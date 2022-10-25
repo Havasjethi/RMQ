@@ -44,18 +44,22 @@ Adatok
 - Ide jönnek be az üzenetek
 - Feladatuk: Routing
   - Szétszórni a beérkező üzeneteket a Queue-k ba
+  - Alapvetően léteznek különböző Exchange-ek amq.<type> -al
 
 Adatok
 
 - Név, Durability, AutoDelete, Args
 
-Types:
+#### Exchange types:
 
-- ## Direct: messages to queues based on the message routing key
+- Direct: messages to queues based on the message routing key
 - Fanout: exchange routes messages to all of the queues that are bound to it and the routing key is ignored
   - Cél mindenki kapjon értesítést
-- Topic: 0+ Queue-ba; Routing key alapján szorírozás
+- Topic: 0+ Queue-ba; Routing key alapján szorírozás, Egy üzenet több Queue-ra is bekerülhet
+  - Wild karakterek: `*` egy adott szegmenst, `#` 0...n szegemenst match-el
 - Headers: routing on multiple Message Header attributes alapján; Routing key ignorálva
+
+  - amq.match
 
 Extra:
 Default Exchange || Direct Exchange with binding to every single queue
@@ -86,3 +90,16 @@ Each consumer (subscription) has an identifier called a consumer tag. It can be 
 ##### Links
 
 - https://www.rabbitmq.com/tutorials/amqp-concepts.html
+
+# Intresting:
+
+- The server MUST NOT modify message content bodies that it receives and passes to consumer
+  applications. The server MAY add information to content headers but it MUST NOT remove or modify existing information
+
+# Virtual Host
+
+- administrative convenience which will prove useful to those wishing to provide AMQP as a service on a shared infrastructure
+- Each connection MUST BE associated with a single virtual host
+- Container of exchanges, queues -> Bindigs
+- Own auth rules (Users)
+-

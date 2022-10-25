@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+
+  rabbitmq_q:
+    container_name: rabbitmq
+    hostname: rabbitmq
+    image: bitnami/rabbitmq:3.10.7
+    environment:
+      - RABBITMQ_ERL_COOKIE='havas secret cookie'
+      - RABBITMQ_USERNAME=rabbitmq
+      - RABBITMQ_PASSWORD=rabbitmq
+      - RABBITMQ_LOAD_DEFINITIONS=no
+      # - RABBITMQ_DEFINITIONS_FILE=/bitnami/rabbitmq/conf/load-definitions.json
+      - RABBITMQ_VHOST=/vhost
+      - RABBITMQ_PLUGINS=rabbitmq_management
+    # restart: on-failure
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    # volumes:
+      # - rabbitmq_data:/bitnami/rabbitmq/mnesia
+      # - ./rabbitmq/rabbitmq.conf:/bitnami/rabbitmq/conf/custom.conf:ro
+      # - ./rabbitmq/definitions.json:/bitnami/rabbitmq/conf/load-definitions.json:ro
+    networks:
+      - net
+
+networks:
+  net:
+    name: fea_net
+    driver: bridge

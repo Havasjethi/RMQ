@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link href="./styles.css" rel="stylesheet" />
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <h1>Hello World!</h1>
+    <div id="app">
+
+      <form @submit.prevent="submit_message">
+        <h4>Create message</h4>
+        <div>
+
+        <div>
+          <label>
+            <span>Exchange</span>
+            <input type="text" v-model="form_data.exchange" />
+          </label>
+        </div>
+        <div>
+          <label>
+            <span>Routing key</span>
+            <input type="text" v-model="form_data.routing_key" />
+          </label>
+        </div>
+          <label>
+            <span>Message</span>
+            <input type="text" v-model="form_data.message" />
+          </label>
+        </div>
+        <button>Submit</button>
+      </form>
+      <ul>
+        <div>Setups:</div>
+        <li v-for="o in options"><button @click="o.fn">{{o.name}}</button></li>
+      </ul>
+
+      <div class="message-container">
+        <h2>Messages</h2>
+        <div v-for="listener in listeners">
+          <div>
+            <h4>{{listener.name}}</h4>
+            <div v-for="message in listener.messages">
+              <span>{{message.time}}</span>
+              <span>{{message.content}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <form @submit.prevent="submit_queue">
+        <h4>Create Listener</h4>
+        <div>
+          <label>
+            <span>Queue</span>
+            <input type="text" v-model="queue_data.name" />
+          </label>
+        </div>
+      </div>
+    </form>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+    <script src="./renderer.js"></script>
+  </body>
+</html>
+
