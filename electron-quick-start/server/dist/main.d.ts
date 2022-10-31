@@ -1,6 +1,10 @@
 export declare const stuff: {};
 export declare const external_api: {
-    listen_to_private_queue(): void;
+    shutdown(): Promise<void[]>;
+    listen_to_private_queue(): Promise<[
+        number,
+        string
+    ]>;
     listen_to_queue(queue_name: string): void;
     load_configuration(configuration_index: number): void;
 };

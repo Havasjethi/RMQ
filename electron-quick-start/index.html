@@ -9,6 +9,7 @@
     <h1>Hello World!</h1>
 
     <div id="app">
+      <button @click="create_private">Create Servernamed</button>
       <form @submit.prevent="submit_message">
         <h4>Create message</h4>
         <div>
@@ -58,8 +59,6 @@
           </label>
         </div>
       </form>
-
-      <button @click="create_private">Create Servernamed</button>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->

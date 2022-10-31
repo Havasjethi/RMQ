@@ -15,30 +15,46 @@ const options = [
 ];
 
 const main = () => {
+  const data = {
+    message: 'Hello Vue!',
+    options,
+    form_data: {
+      message: 'm',
+      exchange: 'e',
+      routing_key: 'k',
+    },
+    queue_data: {
+      name: 'q_name',
+    },
+    listeners: [createListener(), createListener()],
+  };
   const app = new Vue({
     el: '#app',
-    data: {
-      message: 'Hello Vue!',
-      options,
-      form_data: {
-        message: 'm',
-        exchange: 'e',
-        routing_key: 'k',
-      },
-      queue_data: {
-        name: 'q_name',
-      },
-      listeners: [createListener(), createListener()],
-    },
+    data,
     methods: {
       submit_message() {
-        this.listeners.forEach((e) => e.messages.push(createMessage(this.form_data.message)));
+        // this.listeners.forEach((e) => e.messages.push(createMessage(this.form_data.message)));
+        API.send_message(
+          this.form_data.exchange,
+          this.form_data.routing_key,
+          this.form_data.message
+        );
       },
-      submit_queue: function (e) {
-        this.listeners.push(createListener(this.queue_data.name));
+      async submit_queue(e) {
+        const createQueue = await API.listen_to_queue(this.queue_data.name);
+        console.log(createQueue);
+
+        let x = createListener(createQueue);
+        this.listeners.push(x);
+        API.subscribe_to_queue();
       },
       async create_private() {
-        console.log(await API.listen_to_queue('valami'));
+        const res = await API.listen_to_private_queue();
+        const x = createListener(res[1]);
+        this.listeners.push(x);
+        API.subscribe_to_queue(res[0], (content, time) => {
+          x.messages.push(createMessage(content, time));
+        });
       },
     },
   });

@@ -6,7 +6,7 @@ export declare class ConnHolder {
     constructor(connection_creator: () => Promise<Connection>);
     create_connection_handler(): Promise<ConnectionHandler>;
     close_all(): Promise<void[]>;
-    listen_to_private_queue(listener: (id: any, message: any) => void): Promise<void>;
+    listen_to_private_queue(listener: (id: any, message: any) => void): Promise<[number, string]>;
     listen_to_queue(queue_name: string, listener: (id: number, message: string) => void): Promise<void>;
 }
 export declare class ConnectionHandler {
@@ -19,7 +19,7 @@ export declare class ConnectionHandler {
     execute(action: (channel: Channel) => Promise<void>): Promise<void>;
     private getChannel;
     consume(queue_name: string, message_handler: (message_content: any) => void): Promise<void>;
-    consume_private(arg0: (message: any) => void): Promise<void>;
+    create_private_queue(message_handler: (message: string) => void): Promise<string>;
     close(): void;
 }
 //# sourceMappingURL=connection.d.ts.map

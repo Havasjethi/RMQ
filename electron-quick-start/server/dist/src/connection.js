@@ -18,9 +18,12 @@ class ConnHolder {
     }
     async listen_to_private_queue(listener) {
         let ch = await this.create_connection_handler();
-        ch.consume_private((message) => {
-            listener(ch.id, message);
-        });
+        return [
+            ch.id,
+            await ch.create_private_queue((message) => {
+                listener(ch.id, message);
+            }),
+        ];
     }
     async listen_to_queue(queue_name, listener) {
         let ch = await this.create_connection_handler();
@@ -57,8 +60,16 @@ class ConnectionHandler {
             channel.ack(message);
         });
     }
-    async consume_private(arg0) {
-        throw new Error('Method not implemented.');
+    async create_private_queue(message_handler) {
+        const channel = await this.getChannel();
+        const queue_name = (await channel.assertQueue('', { autoDelete: true, arguments: [] })).queue;
+        channel.consume(queue_name, (message) => {
+            if (!message)
+                return;
+            message_handler(String.fromCharCode(...message.content));
+            channel.ack(message);
+        });
+        return queue_name;
     }
     close() {
         try {

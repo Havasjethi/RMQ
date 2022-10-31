@@ -4,9 +4,23 @@ const path = require('path');
 const amqplib = require('amqplib');
 const server_components = require('./server/dist/main');
 
+/** @type{electron.WebContents}
+ */
+let main_window_web_contents;
 console.log(server_components);
 server_components.init_external_api({
-  notify(connectionId, message, time) {},
+  notify(connectionId, message, time) {
+    // console.log('Hello', connectionId, message);
+    try {
+      // const target = 'message';
+      const target = 'message-' + connectionId;
+      console.log('Sending to : ', target);
+      // main_window_web_contents.channel;
+      main_window_web_contents.send(target, message, time);
+    } catch (e) {
+      console.log(e);
+    }
+  },
   notifyError(connectionId, message, time) {},
 });
 
@@ -25,17 +39,31 @@ function createWindow() {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+  main_window_web_contents = mainWindow.webContents;
 }
 
+function initHandlers() {
+  ipcMain.handle('listen_to_queue', async (event, queue_name) => {
+    server_components.external_api.listen_to_queue(queue_name);
+
+    return 'OK';
+  });
+
+  ipcMain.handle('listen_to_private_queue', async (event) =>
+    server_components.external_api.listen_to_private_queue()
+  );
+  ipcMain.handle('subscribe_to_queue', (id, listener) => {
+    server_components.external_api;
+  });
+  ipcMain.on('send_message', (exchange, routing_key, message) => {
+    server_components.external_api;
+    // ipcRenderer.invoke('send_message', exchange, routing_key, message);
+  });
+}
 function init() {
   app.whenReady().then(() => {
     createWindow();
-
-    ipcMain.handle('listen_to_queue', async (event, queue_name) => {
-      server_components.external_api.listen_to_queue(queue_name);
-
-      return 'OK';
-    });
+    initHandlers();
 
     app.on('activate', function () {
       // On macOS it's common to re-create a window in the app when the
@@ -48,6 +76,7 @@ function init() {
   // for applications and their menu bar to stay active until the user quits
   // explicitly with Cmd + Q.
   app.on('window-all-closed', function () {
+    server_components.shutdown;
     if (process.platform !== 'darwin') app.quit();
   });
 }

@@ -68,10 +68,16 @@ class ConfigLoader {
     }
 }
 exports.external_api = {
-    listen_to_private_queue() {
-        conn_handler.listen_to_private_queue((id, message) => {
+    shutdown() {
+        return conn_handler.close_all();
+    },
+    async listen_to_private_queue() {
+        const x = await conn_handler.listen_to_private_queue((id, message) => {
             ElectronAPI.notify(id, message, Date.now());
         });
+        console.log('X: ', x);
+        setTimeout(() => ElectronAPI.notify(x[0], 'Test', Date.now()), 1500);
+        return x;
     },
     listen_to_queue(queue_name) {
         conn_handler.listen_to_queue(queue_name, (id, message) => {
