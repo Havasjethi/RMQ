@@ -1,43 +1,44 @@
-console.log("Hello");
+console.log('Hello');
 const options = [
   {
-    name: "A",
+    name: 'A',
     fn: () => {
-      console.log("Hello");
+      console.log('Hello');
     },
   },
   {
-    name: "B",
+    name: 'B',
     fn: () => {
-      console.log("B ello");
+      console.log('B ello');
     },
   },
 ];
 
 const main = () => {
   const app = new Vue({
-    el: "#app",
+    el: '#app',
     data: {
-      message: "Hello Vue!",
+      message: 'Hello Vue!',
       options,
       form_data: {
-        message: "m",
-        exchange: "e",
-        routing_key: "k",
+        message: 'm',
+        exchange: 'e',
+        routing_key: 'k',
       },
       queue_data: {
-        name: "q_name",
+        name: 'q_name',
       },
       listeners: [createListener(), createListener()],
     },
     methods: {
       submit_message() {
-        this.listeners.forEach((e) =>
-          e.messages.push(createMessage(this.form_data.message))
-        );
+        this.listeners.forEach((e) => e.messages.push(createMessage(this.form_data.message)));
       },
       submit_queue: function (e) {
         this.listeners.push(createListener(this.queue_data.name));
+      },
+      async create_private() {
+        console.log(await API.listen_to_queue('valami'));
       },
     },
   });
@@ -49,7 +50,7 @@ const createListener = (name) => ({
   messages: [createMessage(), createMessage()],
 });
 const createMessage = (content, time) => ({
-  content: content || "Hello",
+  content: content || 'Hello',
   time: time || Date.now(),
 });
 

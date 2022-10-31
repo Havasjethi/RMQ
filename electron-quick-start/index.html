@@ -3,28 +3,27 @@
   <head>
     <meta charset="UTF-8" />
     <link href="./styles.css" rel="stylesheet" />
-    <title>Hello World!</title>
+    <title>Rabbit Example</title>
   </head>
   <body>
     <h1>Hello World!</h1>
-    <div id="app">
 
+    <div id="app">
       <form @submit.prevent="submit_message">
         <h4>Create message</h4>
         <div>
-
-        <div>
-          <label>
-            <span>Exchange</span>
-            <input type="text" v-model="form_data.exchange" />
-          </label>
-        </div>
-        <div>
-          <label>
-            <span>Routing key</span>
-            <input type="text" v-model="form_data.routing_key" />
-          </label>
-        </div>
+          <div>
+            <label>
+              <span>Exchange</span>
+              <input type="text" v-model="form_data.exchange" />
+            </label>
+          </div>
+          <div>
+            <label>
+              <span>Routing key</span>
+              <input type="text" v-model="form_data.routing_key" />
+            </label>
+          </div>
           <label>
             <span>Message</span>
             <input type="text" v-model="form_data.message" />
@@ -55,13 +54,15 @@
           <label>
             <span>Queue</span>
             <input type="text" v-model="queue_data.name" />
+            <button>Submit</button>
           </label>
         </div>
-      </div>
-    </form>
+      </form>
+
+      <button @click="create_private">Create Servernamed</button>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
     <script src="./renderer.js"></script>
   </body>
 </html>
-
