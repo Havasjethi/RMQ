@@ -5,9 +5,10 @@ export declare class ConnHolder {
     handlers: ConnectionHandler[];
     constructor(connection_creator: () => Promise<Connection>);
     create_connection_handler(): Promise<ConnectionHandler>;
+    close_handler(id: number): Promise<void>;
     close_all(): Promise<void[]>;
     listen_to_private_queue(listener: (id: any, message: any) => void): Promise<[number, string]>;
-    listen_to_queue(queue_name: string, listener: (id: number, message: string) => void): Promise<void>;
+    listen_to_queue(queue_name: string, listener: (id: number, message: string) => void): Promise<[number, string]>;
 }
 export declare class ConnectionHandler {
     private connection;
@@ -18,7 +19,7 @@ export declare class ConnectionHandler {
     constructor(connection: Connection);
     execute(action: (channel: Channel) => Promise<unknown | void>): Promise<unknown>;
     private getChannel;
-    consume(queue_name: string, message_handler: (message_content: any) => void): Promise<void>;
+    consume(queue_name: string, message_handler: (message_content: any) => void): Promise<string>;
     create_private_queue(message_handler: (message: string) => void): Promise<string>;
     close(): void;
 }

@@ -14,7 +14,7 @@ server_components.init_external_api({
     try {
       // const target = 'message';
       const target = 'message-' + connectionId;
-      console.log('Sending to : ', target);
+      console.log('Sending to : ', target, message);
       // main_window_web_contents.channel;
       main_window_web_contents.send(target, message, time);
     } catch (e) {
@@ -44,9 +44,10 @@ function createWindow() {
 
 function initHandlers() {
   ipcMain.handle('listen_to_queue', async (event, queue_name) => {
-    server_components.external_api.listen_to_queue(queue_name);
-
-    return 'OK';
+    return server_components.external_api.listen_to_queue(queue_name);
+  });
+  ipcMain.handle('unsubscribe', async (event, id) => {
+    server_components.external_api.unsubscribe(id);
   });
 
   ipcMain.handle('listen_to_private_queue', async (event) =>

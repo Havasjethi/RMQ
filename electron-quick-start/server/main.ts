@@ -11,7 +11,7 @@ const QueueNames = {
   queue_3: 'Egyedi',
 };
 
-const connections: ConnectionHolder[] = [];
+// const connections: ConnectionHolder[] = [];
 
 type ConfigLoadFunction = {
   load: (channel: Channel) => Promise<void>;
@@ -95,6 +95,10 @@ export const external_api = {
   shutdown() {
     return conn_handler.close_all();
   },
+  async unsubscribe(id: number) {
+    conn_handler.close_handler(id);
+    console.log(conn_handler.handlers, id);
+  },
   async listen_to_private_queue(): Promise<[number, string]> {
     const x = await conn_handler.listen_to_private_queue((id, message) => {
       ElectronAPI.notify(id, message, Date.now());
@@ -105,8 +109,8 @@ export const external_api = {
 
     return x;
   },
-  listen_to_queue(queue_name: string) {
-    conn_handler.listen_to_queue(queue_name, (id, message) => {
+  listen_to_queue(queue_name: string): Promise<[number, string]> {
+    return conn_handler.listen_to_queue(queue_name, (id, message) => {
       ElectronAPI.notify(id, message, Date.now());
     });
   },

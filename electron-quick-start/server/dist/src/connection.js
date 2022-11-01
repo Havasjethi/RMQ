@@ -13,11 +13,21 @@ class ConnHolder {
         this.handlers.push(a);
         return a;
     }
+    async close_handler(id) {
+        this.handlers.find((e) => e.id === id)?.close();
+    }
     async close_all() {
-        return Promise.all(this.connections.map((e) => e.close()));
+        return Promise.all(this.connections.map((e) => {
+            try {
+                e.close();
+            }
+            catch (exception) {
+                console.log('Close error, Maybe already closed');
+            }
+        }));
     }
     async listen_to_private_queue(listener) {
-        let ch = await this.create_connection_handler();
+        const ch = await this.create_connection_handler();
         return [
             ch.id,
             await ch.create_private_queue((message) => {
@@ -26,10 +36,13 @@ class ConnHolder {
         ];
     }
     async listen_to_queue(queue_name, listener) {
-        let ch = await this.create_connection_handler();
-        ch.consume(queue_name, (message) => {
-            listener(ch.id, message);
-        });
+        const ch = await this.create_connection_handler();
+        return [
+            ch.id,
+            await ch.consume(queue_name, (message) => {
+                listener(ch.id, message);
+            }),
+        ];
     }
 }
 exports.ConnHolder = ConnHolder;
@@ -52,13 +65,15 @@ class ConnectionHandler {
     }
     async consume(queue_name, message_handler) {
         const channel = await this.getChannel();
-        const x = channel.assertQueue(queue_name, {});
+        const x = await channel.assertQueue(queue_name, {});
         channel.consume(queue_name, (message) => {
             if (!message)
                 return;
-            message_handler(message);
+            console.log('Received AMQ message', message);
+            message_handler(String.fromCharCode(...message.content));
             channel.ack(message);
         });
+        return x.queue;
     }
     async create_private_queue(message_handler) {
         const channel = await this.getChannel();

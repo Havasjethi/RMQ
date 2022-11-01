@@ -11,7 +11,6 @@ const QueueNames = {
     queue_2: 'Mi',
     queue_3: 'Egyedi',
 };
-const connections = [];
 const configurations = [
     {
         async load(channel) {
@@ -83,6 +82,10 @@ exports.external_api = {
     shutdown() {
         return conn_handler.close_all();
     },
+    async unsubscribe(id) {
+        conn_handler.close_handler(id);
+        console.log(conn_handler.handlers, id);
+    },
     async listen_to_private_queue() {
         const x = await conn_handler.listen_to_private_queue((id, message) => {
             ElectronAPI.notify(id, message, Date.now());
@@ -92,7 +95,7 @@ exports.external_api = {
         return x;
     },
     listen_to_queue(queue_name) {
-        conn_handler.listen_to_queue(queue_name, (id, message) => {
+        return conn_handler.listen_to_queue(queue_name, (id, message) => {
             ElectronAPI.notify(id, message, Date.now());
         });
     },

@@ -14,7 +14,7 @@ const main = () => {
       name: 'q_name',
       auto_delete: false,
     },
-    listeners: [createListener(), createListener()],
+    listeners: [],
   };
 
   const app = new Vue({
@@ -52,14 +52,16 @@ const main = () => {
         API.unsubscribe(listener.id);
       },
       async submit_queue(e) {
-        const createQueue = await API.listen_to_queue(this.queue_data.name);
-        let x = createListener(createQueue);
+        const res = await API.listen_to_queue(this.queue_data.name, this.queue_data.auto_delete);
+        let x = createListener(res[1], res[0]);
         this.listeners.push(x);
-        API.subscribe_to_queue();
+        API.subscribe_to_queue(res[0], (content, time) => {
+          x.messages.push(createMessage(content, time));
+        });
       },
       async create_private() {
         const res = await API.listen_to_private_queue();
-        const x = createListener(res[1]);
+        const x = createListener(res[1], res[0]);
         this.listeners.push(x);
         API.subscribe_to_queue(res[0], (content, time) => {
           x.messages.push(createMessage(content, time));

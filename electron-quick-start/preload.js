@@ -20,6 +20,9 @@ const API = {
     // listener(messageContent, time);
     // });
   },
+  unsubscribe(id) {
+    ipcRenderer.invoke('unsubscribe', id);
+  },
   send_message(exchange, routing_key, message) {
     ipcRenderer.invoke('send_message', exchange, routing_key, message);
   },
