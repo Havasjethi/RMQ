@@ -1,3 +1,53 @@
 /* styles.css */
 
 /* Add styles here to customize the appearance of your app */
+.message-container {
+  display: flex;
+  justify-content: left;
+  gap: 0.6rem;
+  width: 100vw;
+}
+
+/* .messages { */
+/* display: flex; */
+/* width: 100vw; */
+/* } */
+.setup_image {
+  width: 25rem;
+}
+
+.message-queues {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid green;
+}
+.queue-header {
+  display: flex;
+  justify-content: space-around;
+}
+
+.queue-header > span {
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.message {
+  width: 14rem;
+  max-height: 5rem;
+  overflow-y: scroll;
+  word-break: break-all;
+
+  padding: 0.3rem 0.5rem;
+}
+
+.message ~ .message {
+  border-top: 2px dotted green;
+  padding-top: 0.8rem;
+}
+
+.content {
+  display: flex;
+  justify-content: right;
+  padding: 0.2rem 0;
+}
+

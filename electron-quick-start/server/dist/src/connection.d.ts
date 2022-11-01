@@ -16,7 +16,7 @@ export declare class ConnectionHandler {
     private channels;
     private all_channels;
     constructor(connection: Connection);
-    execute(action: (channel: Channel) => Promise<void>): Promise<void>;
+    execute(action: (channel: Channel) => Promise<unknown | void>): Promise<unknown>;
     private getChannel;
     consume(queue_name: string, message_handler: (message_content: any) => void): Promise<void>;
     create_private_queue(message_handler: (message: string) => void): Promise<string>;

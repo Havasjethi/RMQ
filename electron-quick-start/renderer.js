@@ -1,37 +1,43 @@
 console.log('Hello');
-const options = [
-  {
-    name: 'A',
-    fn: () => {
-      console.log('Hello');
-    },
-  },
-  {
-    name: 'B',
-    fn: () => {
-      console.log('B ello');
-    },
-  },
-];
+const options = ['Direct', 'Topic', 'Fanout', 'Header', 'Complex'];
 
 const main = () => {
   const data = {
-    message: 'Hello Vue!',
     options,
+    active_config_index: -1,
     form_data: {
-      message: 'm',
-      exchange: 'e',
-      routing_key: 'k',
+      message: 'Hello',
+      exchange: '',
+      routing_key: 'queue_1',
     },
     queue_data: {
       name: 'q_name',
+      auto_delete: false,
     },
     listeners: [createListener(), createListener()],
   };
+
   const app = new Vue({
     el: '#app',
     data,
+    computed: {
+      current_alt_text() {
+        return this.active_config_index > 0
+          ? this.options[this.active_config_index]
+          : 'No selected setup';
+      },
+      current_image() {
+        return `assets/${this.active_config_index}.png`;
+      },
+    },
     methods: {
+      format_date(timestamp) {
+        return new Date(timestamp).toLocaleTimeString();
+      },
+      setup_state(state_index) {
+        API.setup_state(state_index);
+        this.active_config_index = state_index;
+      },
       submit_message() {
         // this.listeners.forEach((e) => e.messages.push(createMessage(this.form_data.message)));
         API.send_message(
@@ -40,10 +46,13 @@ const main = () => {
           this.form_data.message
         );
       },
+      remove_listener(listener) {
+        const index = data.listeners.findIndex((e) => e.id === listener.id);
+        data.listeners.splice(index, 1);
+        API.unsubscribe(listener.id);
+      },
       async submit_queue(e) {
         const createQueue = await API.listen_to_queue(this.queue_data.name);
-        console.log(createQueue);
-
         let x = createListener(createQueue);
         this.listeners.push(x);
         API.subscribe_to_queue();
@@ -61,9 +70,11 @@ const main = () => {
 };
 
 let c = 1;
-const createListener = (name) => ({
-  name: name || c++,
-  messages: [createMessage(), createMessage()],
+const createListener = (name, id) => ({
+  id: id || c++,
+  name: name || c,
+  // messages: [],
+  messages: [createMessage(), createMessage('aaaaaaaaaaaaaa asd')],
 });
 const createMessage = (content, time) => ({
   content: content || 'Hello',

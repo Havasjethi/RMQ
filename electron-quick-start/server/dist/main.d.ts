@@ -6,7 +6,7 @@ export declare const external_api: {
         string
     ]>;
     listen_to_queue(queue_name: string): void;
-    load_configuration(configuration_index: number): void;
+    load_configuration(configuration_index: number): Promise<void>;
 };
 export declare function main(): Promise<void>;
 interface API {

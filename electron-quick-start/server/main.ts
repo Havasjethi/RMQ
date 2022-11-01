@@ -5,7 +5,7 @@ export const stuff = {};
 // const username = "rabbitmq";
 const username = 'guest';
 
-const queue_name = {
+const QueueNames = {
   queue_1: 'Vala',
   queue_2: 'Mi',
   queue_3: 'Egyedi',
@@ -23,9 +23,9 @@ const configurations: ConfigLoadFunction[] = [
     async load(channel) {
       const exchange_name = 'Exchange_1';
       channel.assertExchange(exchange_name, 'direct', { arguments: [] });
-      channel.bindExchange(queue_name.queue_1, exchange_name, queue_name.queue_1);
-      channel.bindExchange(queue_name.queue_2, exchange_name, queue_name.queue_2);
-      channel.bindExchange(queue_name.queue_3, exchange_name, queue_name.queue_3);
+      channel.bindQueue(QueueNames.queue_1, exchange_name, QueueNames.queue_1);
+      channel.bindQueue(QueueNames.queue_2, exchange_name, QueueNames.queue_2);
+      channel.bindQueue(QueueNames.queue_3, exchange_name, QueueNames.queue_3);
     },
     async unload(ch) {
       ch.deleteExchange('Exchange_1', { ifUnused: false });
@@ -35,9 +35,9 @@ const configurations: ConfigLoadFunction[] = [
     async load(channel) {
       const exchange_name = 'Exchange_2';
       channel.assertExchange(exchange_name, 'topic', { arguments: [] });
-      channel.bindExchange(queue_name.queue_1, exchange_name, queue_name.queue_1);
-      channel.bindExchange(queue_name.queue_2, exchange_name, queue_name.queue_2);
-      channel.bindExchange(queue_name.queue_3, exchange_name, queue_name.queue_3);
+      channel.bindQueue(QueueNames.queue_1, exchange_name, QueueNames.queue_1);
+      channel.bindQueue(QueueNames.queue_2, exchange_name, QueueNames.queue_2);
+      channel.bindQueue(QueueNames.queue_3, exchange_name, QueueNames.queue_3);
     },
     async unload(ch) {
       ch.deleteExchange('Exchange_2', { ifUnused: false });
@@ -48,9 +48,9 @@ const configurations: ConfigLoadFunction[] = [
     async load(channel) {
       const exchange_name = 'Exchange_3';
       channel.assertExchange(exchange_name, 'fanout', { arguments: [] });
-      channel.bindExchange(queue_name.queue_1, exchange_name, queue_name.queue_1);
-      channel.bindExchange(queue_name.queue_2, exchange_name, queue_name.queue_2);
-      channel.bindExchange(queue_name.queue_3, exchange_name, queue_name.queue_3);
+      channel.bindQueue(QueueNames.queue_1, exchange_name, QueueNames.queue_1);
+      channel.bindQueue(QueueNames.queue_2, exchange_name, QueueNames.queue_2);
+      channel.bindQueue(QueueNames.queue_3, exchange_name, QueueNames.queue_3);
     },
     async unload(ch) {
       ch.deleteExchange('Exchange_3', { ifUnused: false });
@@ -67,11 +67,27 @@ class ConfigLoader {
     if (this.active_configuration_index > 0) {
       this._unload(this.active_configuration_index);
     }
+    await this.assertQueues();
     this.connection.execute(configurations[index].load);
   }
 
   async _unload(index: number) {
     this.connection.execute(configurations[index].unload);
+  }
+
+  private async assertQueues() {
+    return this.connection.execute((channel) =>
+      Promise.all(
+        Object.values(QueueNames).map(async (e) => {
+          try {
+            console.log('HEllo');
+            await channel.assertQueue(e, { autoDelete: true });
+          } catch (e) {
+            console.log('Warn: Invalid Options');
+          }
+        })
+      )
+    );
   }
 }
 
@@ -94,7 +110,7 @@ export const external_api = {
       ElectronAPI.notify(id, message, Date.now());
     });
   },
-  load_configuration(configuration_index: number) {
+  async load_configuration(configuration_index: number) {
     ConfigLoaderInstance.load(configuration_index);
   },
 };

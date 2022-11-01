@@ -46,7 +46,7 @@ export class ConnectionHandler {
 
   constructor(private connection: Connection) {}
 
-  async execute(action: (channel: Channel) => Promise<void>) {
+  async execute(action: (channel: Channel) => Promise<unknown | void>) {
     return action(await this.getChannel());
   }
 

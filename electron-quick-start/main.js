@@ -52,10 +52,14 @@ function initHandlers() {
   ipcMain.handle('listen_to_private_queue', async (event) =>
     server_components.external_api.listen_to_private_queue()
   );
-  ipcMain.handle('subscribe_to_queue', (id, listener) => {
+  ipcMain.handle('subscribe_to_queue', (event, id, listener) => {
     server_components.external_api;
   });
-  ipcMain.on('send_message', (exchange, routing_key, message) => {
+  ipcMain.handle('setup_state', (event, state_index) => {
+    console.log('Got stateIndex:', state_index);
+    server_components.external_api.load_configuration(state_index);
+  });
+  ipcMain.on('send_message', (event, exchange, routing_key, message) => {
     server_components.external_api;
     // ipcRenderer.invoke('send_message', exchange, routing_key, message);
   });

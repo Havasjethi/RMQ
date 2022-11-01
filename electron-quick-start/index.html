@@ -6,10 +6,7 @@
     <title>Rabbit Example</title>
   </head>
   <body>
-    <h1>Hello World!</h1>
-
     <div id="app">
-      <button @click="create_private">Create Servernamed</button>
       <form @submit.prevent="submit_message">
         <h4>Create message</h4>
         <div>
@@ -32,36 +29,56 @@
         </div>
         <button>Submit</button>
       </form>
-      <ul>
-        <div>Setups:</div>
-        <li v-for="o in options"><button @click="o.fn">{{o.name}}</button></li>
-      </ul>
+      <div>
+        <h3>Setups:</h3>
+        <img
+          v-if="active_config_index >= 0"
+          class="setup_image"
+          :src="current_image"
+          :alt="current_alt_text"
+        />
+        <ul>
+          <li v-for="(name, index) in options">
+            <button @click="setup_state(index)">{{ name }}</button>
+          </li>
+        </ul>
+      </div>
 
+      <h2>Messages</h2>
       <div class="message-container">
-        <h2>Messages</h2>
-        <div v-for="listener in listeners">
-          <div>
-            <h4>{{listener.name}}</h4>
-            <div v-for="message in listener.messages">
-              <span>{{message.time}}</span>
-              <span>{{message.content}}</span>
-            </div>
+        <div class="message-queues" v-for="listener in listeners">
+          <div class="queue-header">
+            <span>{{listener.name}}</span>
+            <button @click="remove_listener(listener)">X</button>
+          </div>
+          <div class="message" v-for="message in listener.messages">
+            <div>{{ format_date(message.time) }}</div>
+            <div class="content">{{ message.content }}</div>
           </div>
         </div>
       </div>
+
       <form @submit.prevent="submit_queue">
-        <h4>Create Listener</h4>
+        <h4>Create Queue Listener</h4>
         <div>
           <label>
             <span>Queue</span>
             <input type="text" v-model="queue_data.name" />
-            <button>Submit</button>
           </label>
         </div>
+        <div>
+          <label>
+            <span>Private</span>
+            <input type="checkbox" v-model="queue_data.auto_delete" />
+          </label>
+        </div>
+        <button>Submit</button>
       </form>
+      <button @click="create_private">Create Servernamed</button>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
     <script src="./renderer.js"></script>
+    <script src="./some.js"></script>
   </body>
 </html>

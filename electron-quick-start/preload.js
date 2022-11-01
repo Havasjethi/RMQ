@@ -1,8 +1,11 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('API', {
+const API = {
   listen_to_queue: (name) => ipcRenderer.invoke('listen_to_queue', name),
   listen_to_private_queue: () => ipcRenderer.invoke('listen_to_private_queue'),
+  setup_state(state_index) {
+    ipcRenderer.invoke('setup_state', state_index);
+  },
   subscribe_to_queue: (id, listener) => {
     const channel = `message-${id}`;
     console.log('Listening to inner: ', channel);
@@ -23,4 +26,5 @@ contextBridge.exposeInMainWorld('API', {
   // load_configuration: (index) => process.versions.node,
   // chrome: () => process.versions.chrome,
   // electron: () => process.versions.electron,
-});
+};
+contextBridge.exposeInMainWorld('API', API);
