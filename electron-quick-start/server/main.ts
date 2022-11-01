@@ -1,9 +1,14 @@
 import { Channel, connect } from 'amqplib';
 import { ConnectionHandler, ConnHolder as ConnectionHolder } from './src/connection';
 
-export const stuff = {};
-// const username = "rabbitmq";
 const username = 'guest';
+
+const ConnectionConfig = {
+  hostname: 'localhost',
+  username,
+  password: username,
+  vhost: '/',
+};
 
 const QueueNames = {
   queue_1: 'Vala',
@@ -96,18 +101,12 @@ export const external_api = {
     return conn_handler.close_all();
   },
   async unsubscribe(id: number) {
-    conn_handler.close_handler(id);
-    console.log(conn_handler.handlers, id);
+    return conn_handler.close_handler(id);
   },
   async listen_to_private_queue(): Promise<[number, string]> {
-    const x = await conn_handler.listen_to_private_queue((id, message) => {
+    return await conn_handler.listen_to_private_queue((id, message) => {
       ElectronAPI.notify(id, message, Date.now());
     });
-    console.log('X: ', x);
-
-    setTimeout(() => ElectronAPI.notify(x[0], 'Test', Date.now()), 1500);
-
-    return x;
   },
   listen_to_queue(queue_name: string): Promise<[number, string]> {
     return conn_handler.listen_to_queue(queue_name, (id, message) => {
@@ -119,14 +118,7 @@ export const external_api = {
   },
 };
 
-const connection_config = {
-  hostname: 'localhost',
-  username,
-  password: username,
-  vhost: '/',
-};
-
-const conn_handler = new ConnectionHolder(async () => connect(connection_config));
+const conn_handler = new ConnectionHolder(async () => connect(ConnectionConfig));
 
 let ConfigLoaderInstance: ConfigLoader;
 export async function main() {

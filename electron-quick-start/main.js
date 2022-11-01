@@ -18,7 +18,7 @@ server_components.init_external_api({
       // main_window_web_contents.channel;
       main_window_web_contents.send(target, message, time);
     } catch (e) {
-      console.log(e);
+      console.log('Unable to send message.', e);
     }
   },
   notifyError(connectionId, message, time) {},

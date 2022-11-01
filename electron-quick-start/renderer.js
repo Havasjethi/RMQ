@@ -1,4 +1,3 @@
-console.log('Hello');
 const options = ['Direct', 'Topic', 'Fanout', 'Header', 'Complex'];
 
 const main = () => {
