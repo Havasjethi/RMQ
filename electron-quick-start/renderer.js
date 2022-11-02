@@ -74,11 +74,12 @@ let c = 1;
 const createListener = (name, id) => ({
   id: id || c++,
   name: name || c,
-  // messages: [],
-  messages: [createMessage(), createMessage('aaaaaaaaaaaaaa asd')],
+  // messages: [createMessage('asdasdasdasdasdasdasd asdasdasdasdasdasdasd ..........')],
+  messages: [createMessage('  ..........')],
+  // messages: [createMessage(), createMessage('aaaaaaaaaaaaaa asd')],
 });
 const createMessage = (content, time) => ({
-  content: content || 'Hello',
+  content: content || '',
   time: time || Date.now(),
 });
 

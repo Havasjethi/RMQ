@@ -8,10 +8,6 @@
   width: 100vw;
 }
 
-/* .messages { */
-/* display: flex; */
-/* width: 100vw; */
-/* } */
 .setup_image {
   width: 25rem;
 }
@@ -20,10 +16,12 @@
   display: flex;
   flex-direction: column;
   border: 1px solid green;
+  width: 14rem;
+  padding: 0.3rem 0.8rem;
 }
 .queue-header {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
 }
 
 .queue-header > span {
@@ -32,12 +30,10 @@
 }
 
 .message {
-  width: 14rem;
+  /* width: 14rem; */
   max-height: 5rem;
   overflow-y: scroll;
   word-break: break-all;
-
-  padding: 0.3rem 0.5rem;
 }
 
 .message ~ .message {
@@ -50,4 +46,3 @@
   justify-content: right;
   padding: 0.2rem 0;
 }
-
