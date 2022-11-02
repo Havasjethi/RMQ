@@ -92,7 +92,9 @@ export class ConnectionHandler {
 
   async create_private_queue(message_handler: (message: string) => void): Promise<string> {
     const channel = await this.getChannel();
-    const queue_name = (await channel.assertQueue('', { autoDelete: true, arguments: [] })).queue;
+    const queue_name = (
+      await channel.assertQueue('', { private: true, autoDelete: true, arguments: [] })
+    ).queue;
     channel.consume(queue_name, (message) => {
       if (!message) return;
       message_handler(String.fromCharCode(...message.content));

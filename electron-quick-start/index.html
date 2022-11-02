@@ -7,7 +7,7 @@
   </head>
   <body>
     <div id="app">
-      <form @submit.prevent="submit_message">
+      <form @submit.prevent="submit_message" v-if="false">
         <h4>Create message</h4>
         <div>
           <div>
@@ -29,7 +29,7 @@
         </div>
         <button>Submit</button>
       </form>
-      <div>
+      <div v-if="false">
         <h3>Setups:</h3>
         <img
           v-if="active_config_index >= 0"
@@ -49,6 +49,7 @@
         <div class="message-queues" v-for="listener in listeners">
           <div class="queue-header">
             <span>{{listener.name}}</span>
+            <button @click="clearQueue(listener)">Clear</button>
             <button @click="remove_listener(listener)">X</button>
           </div>
           <div class="message" v-for="message in listener.messages">
@@ -74,11 +75,10 @@
         </div>
         <button>Submit</button>
       </form>
-      <button @click="create_private">Create Servernamed</button>
+      <button @click="create_private">Create ServerNamed</button>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
     <script src="./renderer.js"></script>
-    <script src="./some.js"></script>
+    <!-- <script src="./some.js"></script> -->
   </body>
 </html>

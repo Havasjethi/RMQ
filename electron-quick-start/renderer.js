@@ -38,7 +38,6 @@ const main = () => {
         this.active_config_index = state_index;
       },
       submit_message() {
-        // this.listeners.forEach((e) => e.messages.push(createMessage(this.form_data.message)));
         API.send_message(
           this.form_data.exchange,
           this.form_data.routing_key,
@@ -50,16 +49,19 @@ const main = () => {
         data.listeners.splice(index, 1);
         API.unsubscribe(listener.id);
       },
+      clearQueue(listener) {
+        const index = data.listeners.findIndex((e) => e.id === listener.id);
+        data.listeners[index].messages.splice(0);
+      },
       async submit_queue(e) {
-        const res = await API.listen_to_queue(this.queue_data.name, this.queue_data.auto_delete);
-        let x = createListener(res[1], res[0]);
-        this.listeners.push(x);
-        API.subscribe_to_queue(res[0], (content, time) => {
-          x.messages.push(createMessage(content, time));
-        });
+        this._handle_result(
+          await API.listen_to_queue(this.queue_data.name, this.queue_data.auto_delete)
+        );
       },
       async create_private() {
-        const res = await API.listen_to_private_queue();
+        this._handle_result(await API.listen_to_private_queue());
+      },
+      _handle_result(res) {
         const x = createListener(res[1], res[0]);
         this.listeners.push(x);
         API.subscribe_to_queue(res[0], (content, time) => {
@@ -74,9 +76,8 @@ let c = 1;
 const createListener = (name, id) => ({
   id: id || c++,
   name: name || c,
-  // messages: [createMessage('asdasdasdasdasdasdasd asdasdasdasdasdasdasd ..........')],
-  messages: [createMessage('  ..........')],
-  // messages: [createMessage(), createMessage('aaaaaaaaaaaaaa asd')],
+  // messages: [createMessage('..........')],
+  messages: [],
 });
 const createMessage = (content, time) => ({
   content: content || '',

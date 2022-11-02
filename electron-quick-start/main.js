@@ -1,21 +1,15 @@
-// Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const amqplib = require('amqplib');
 const server_components = require('./server/dist/main');
 
-/** @type{electron.WebContents}
- */
+/** @type{electron.WebContents} */
 let main_window_web_contents;
 console.log(server_components);
 server_components.init_external_api({
   notify(connectionId, message, time) {
-    // console.log('Hello', connectionId, message);
     try {
-      // const target = 'message';
       const target = 'message-' + connectionId;
-      console.log('Sending to : ', target, message);
-      // main_window_web_contents.channel;
+      // console.log('Sending to : ', target, message);
       main_window_web_contents.send(target, message, time);
     } catch (e) {
       console.log('Unable to send message.', e);
@@ -34,10 +28,8 @@ function createWindow() {
     },
   });
 
-  // and load the index.html of the app.
   mainWindow.loadFile('index.html');
 
-  // Open the DevTools.
   mainWindow.webContents.openDevTools();
   main_window_web_contents = mainWindow.webContents;
 }
@@ -61,8 +53,8 @@ function initHandlers() {
     server_components.external_api.load_configuration(state_index);
   });
   ipcMain.on('send_message', (event, exchange, routing_key, message) => {
-    server_components.external_api;
-    // ipcRenderer.invoke('send_message', exchange, routing_key, message);
+    // Note:: Not priority
+    // server_components.external_api;
   });
 }
 function init() {
