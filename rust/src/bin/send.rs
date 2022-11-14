@@ -73,14 +73,12 @@ impl ConnectionHandler {
 struct Measurement {
     sent_messages: Mutex<u32>,
     max_pending: u32,
-    // pending_count: u32,
 }
 
 impl Measurement {
     pub fn increment(&self) {
         let mut lock = self.sent_messages.lock().unwrap();
         *lock += 1;
-        // *lock.pending_count += 1;
     }
 }
 
@@ -149,24 +147,8 @@ impl ConnectionHandler {
     }
 }
 
-// async fn send_messages(ch: &Arc<ConnectionHandler>, data: &Arc<Measurement>) -> () {
-// // let count = data.max_pending - data.pending_count;
-// let count = ch.pool_size;
-// let mut res: Vec<JoinHandle<()>> = Vec::new();
-// for _ in 0..count {
-// let handler_copy = ch.clone();
-// // let data_copy = data.clone();
-
-// let x = tokio::spawn(async move { send_message(handler_copy, &data_copy).await });
-// let x = tokio::spawn(async move { send_message(handler_copy).await });
-// res.push(x);
-// }
-// futures::future::join_all(res).await;
-// }
-
 type SenderStuff = tokio::sync::mpsc::Sender<()>;
-async fn send_messages2(ch: &Arc<ConnectionHandler>, data: &Arc<SenderStuff>) -> () {
-    // let count = data.max_pending - data.pending_count;
+async fn send_messages(ch: &Arc<ConnectionHandler>, data: &Arc<SenderStuff>) -> () {
     let count = ch.pool_size;
     let mut res: Vec<JoinHandle<()>> = Vec::new();
 
@@ -174,7 +156,6 @@ async fn send_messages2(ch: &Arc<ConnectionHandler>, data: &Arc<SenderStuff>) ->
         let handler_copy = ch.clone();
         let data_copy = data.clone();
 
-        // let x = tokio::spawn(async move { send_message(handler_copy, &data_copy).await });
         let x = tokio::spawn(async move { send_message(handler_copy, &data_copy).await });
         res.push(x);
     }
@@ -182,19 +163,11 @@ async fn send_messages2(ch: &Arc<ConnectionHandler>, data: &Arc<SenderStuff>) ->
     futures::future::join_all(res).await;
 }
 
-async fn send_message(
-    // ch: Arc<Mutex<ConnectionHandler>>,
-    ch: Arc<ConnectionHandler>,
-    // data: &Arc<Measurement>,
-    data: &Arc<SenderStuff>,
-) -> () {
-    // let mut lock = ch.lock().unwrap();
-    // let channel = lock.get_channel().await;
+async fn send_message(ch: Arc<ConnectionHandler>, data: &Arc<SenderStuff>) -> () {
     let channel = ch.get_channel().await;
 
     let payload = b"asdasd";
 
-    data.send(()).await.unwrap();
     channel
         .basic_publish(
             "",
@@ -205,57 +178,33 @@ async fn send_message(
         )
         .await
         .unwrap();
-    // data.increment();
-    // {
-    // let mut lock = data.try_lock().unwrap();
-    // lock.increment();
-    // }
+    data.send(()).await.unwrap();
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut consumer = ConnectionHandler::connect().await?;
-    // consumer.declare_queue().await;
     let mut producer = ConnectionHandler::connect().await?;
     let (tx, mut rx) = tokio::sync::mpsc::channel::<()>(1_000);
 
     producer.fill_pool().await;
     let shared_tx = Arc::new(tx);
 
-    let taks = tokio::spawn(async move {
-        dbg!("Bello");
+    let send_message_receiver = tokio::spawn(async move {
         let mut total = 0;
-        let mut max_iter = u64::MAX;
-        // while max_iter > 0 {
         while rx.recv().await.is_some() {
-            max_iter -= 1;
             total += 1;
-            // let res = rx.try_recv().;
-            // dbg!(res);
         }
         return total;
-        // while rx.recv().await.is_some() {
-        // dbg!("Hello");
-        // total += 1;
-        // }
-        // return total;
     });
-
-    let x = Measurement {
-        sent_messages: Mutex::new(0),
-        max_pending: 100,
-    };
-    let shared_x = Arc::new(x);
 
     let shared_producer = Arc::new(producer);
 
     send_test(shared_producer, shared_tx).await;
 
-    {
-        let x = shared_x;
-        println!("Total send messages: {:?}", x.sent_messages);
-        dbg!(taks.await.unwrap());
-    }
+    println!(
+        "Total send messages: {:?}",
+        send_message_receiver.await.unwrap()
+    );
 
     Ok(())
 }
@@ -263,6 +212,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn send_test(shared_producer: Arc<ConnectionHandler>, shared_tx: Arc<SenderStuff>) {
     let final_time = Instant::now().add(Duration::from_secs(5));
     while Instant::now() < final_time {
-        send_messages2(&shared_producer, &shared_tx).await;
+        send_messages(&shared_producer, &shared_tx).await;
     }
 }
