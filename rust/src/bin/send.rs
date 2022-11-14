@@ -71,9 +71,17 @@ impl ConnectionHandler {
 
 #[derive(Debug)]
 struct Measurement {
-    sent_messages: u32,
+    sent_messages: Mutex<u32>,
     max_pending: u32,
-    pending_count: u32,
+    // pending_count: u32,
+}
+
+impl Measurement {
+    pub fn increment(&self) {
+        let mut lock = self.sent_messages.lock().unwrap();
+        *lock += 1;
+        // *lock.pending_count += 1;
+    }
 }
 
 impl ConnectionHandler {
@@ -115,7 +123,7 @@ impl ConnectionHandler {
         let handle = tokio::spawn(async move {
             while let Some(delivery) = consumer.next().await {
                 if let Ok(delivery) = delivery {
-                    println!(" [x] Received {:?}", std::str::from_utf8(&delivery.data));
+                    // println!(" [x] Received {:?}", std::str::from_utf8(&delivery.data));
                     delivery
                         .ack(BasicAckOptions::default())
                         .await
@@ -141,28 +149,26 @@ impl ConnectionHandler {
     }
 }
 
-async fn send_messages(
-    ch: &Arc<ConnectionHandler>,
-    data: &Arc<std::sync::Mutex<Measurement>>,
-) -> () {
+async fn send_messages(ch: &Arc<ConnectionHandler>, data: &Arc<Measurement>) -> () {
     // let count = data.max_pending - data.pending_count;
-    let count = 50;
-    let res: Vec<JoinHandle<()>> = Vec::new();
+    let count = ch.pool_size;
+    let mut res: Vec<JoinHandle<()>> = Vec::new();
 
     for _ in 0..count {
         let handler_copy = ch.clone();
         let data_copy = data.clone();
 
-        let res = tokio::spawn(async move { send_message(handler_copy, &data_copy).await });
+        let x = tokio::spawn(async move { send_message(handler_copy, &data_copy).await });
+        res.push(x);
     }
 
-    futures::future::join_all(res);
+    futures::future::join_all(res).await;
 }
 
 async fn send_message(
     // ch: Arc<Mutex<ConnectionHandler>>,
     ch: Arc<ConnectionHandler>,
-    data: &Arc<std::sync::Mutex<Measurement>>,
+    data: &Arc<Measurement>,
 ) -> () {
     {
         // let mut lock = ch.lock().unwrap();
@@ -181,17 +187,17 @@ async fn send_message(
             .await
             .unwrap();
     }
-    {
-        let mut lock = data.try_lock().unwrap();
-        lock.sent_messages += 1;
-        lock.pending_count += 1;
-    }
+    data.increment();
+    // {
+    // let mut lock = data.try_lock().unwrap();
+    // lock.increment();
+    // }
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut consumer = ConnectionHandler::connect().await?;
-    consumer.declare_queue().await;
+    // consumer.declare_queue().await;
     let mut producer = ConnectionHandler::connect().await?;
 
     producer.fill_pool().await;
@@ -200,11 +206,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     consumer.receive_message().await;
 
     let x = Measurement {
-        sent_messages: 0,
+        sent_messages: Mutex::new(0),
         max_pending: 100,
-        pending_count: 0,
+        // pending_count: 0,
     };
-    let shared_x = Arc::new(Mutex::new(x));
+    let shared_x = Arc::new(x);
 
     // let mut interval = time::interval(Duration::from_secs(1));
     let final_time = Instant::now().add(Duration::from_secs(5));
@@ -218,7 +224,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     {
-        let x = shared_x.try_lock().unwrap();
+        let x = shared_x;
         println!("Total send messages: {:?}", x.sent_messages);
     }
 
