@@ -4,7 +4,7 @@ export class ConnHolder {
   connections: Connection[] = [];
   handlers: ConnectionHandler[] = [];
 
-  constructor(private connection_creator: () => Promise<Connection>) {}
+  constructor(private connection_creator: () => Promise<Connection>) { }
 
   async create_connection_handler(): Promise<ConnectionHandler> {
     const a = new ConnectionHandler(await this.connection_creator());
@@ -62,7 +62,7 @@ export class ConnectionHandler {
   private channels: Channel[] = [];
   private all_channels: Channel[] = [];
 
-  constructor(private connection: Connection) {}
+  constructor(private connection: Connection) { }
 
   async execute(action: (channel: Channel) => Promise<unknown | void>) {
     return action(await this.getChannel());
@@ -93,7 +93,7 @@ export class ConnectionHandler {
   async create_private_queue(message_handler: (message: string) => void): Promise<string> {
     const channel = await this.getChannel();
     const queue_name = (
-      await channel.assertQueue('', { private: true, autoDelete: true, arguments: [] })
+      await channel.assertQueue('', { exclusive: true, autoDelete: true, arguments: [] })
     ).queue;
     channel.consume(queue_name, (message) => {
       if (!message) return;
